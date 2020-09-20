@@ -516,3 +516,10 @@ class ActionItem(AbstractActionItem):
     def __str__(self):
         return " ".join(["AI for", str(self.patient) + ":",
                          str(self.instruction), "due on", str(self.due_date)])
+
+
+class PatientDataSummary(Patient):
+    class Meta:
+        proxy = True
+        verbose_name = 'Patient Data Dashboard'
+        verbose_name_plural = 'Patient Data Dashboard'
