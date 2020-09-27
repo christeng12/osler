@@ -11,18 +11,38 @@
       <tr>
         <th>
           <div class=”text”>
-            <a href=”#”>Category</a>
+            <a href=”#”>Workup PK</a>
+          </div>
+        </th>
+        <th>
+          <div class=”text”>
+            <a href=”#”>BP</a>
+          </div>
+        </th>
+        <th>
+          <div class=”text”>
+            <a href=”#”>Ethnicity</a>
+          </div>
+        </th>
+        <th>
+          <div class=”text”>
+            <a href=”#”>
+              <strong>Age</strong>
+            </a>
           </div>
         </th>
       </tr>
     </thead>
     <tbody>
-      {% for row in data %}
-      <tr>
-        <td> {{ row }} </td>
-        <!-- <td> {{ row.bp }} </td> -->
+      {% for dict_item in data %}
+      <tr class="{% cycle 'row1' 'row2' %}">
+        <td> {{ dict_item.workup }} </td>
+        <td> {{ dict_item.bp }} </td>
+        <td> {{ dict_item.ethnicities }} </td>
+        <td> {{ dict_item.age }} </td>
         
       </tr>
+      
       {% endfor %}
     </tbody>
     

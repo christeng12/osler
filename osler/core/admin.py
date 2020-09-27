@@ -34,28 +34,39 @@ class PatientDataDashboardAdmin(admin.ModelAdmin):
 
         frankie = patients.filter(pk=1)
         # gets workups based on patient pk (aka get frankie's workups)
-        workups = Workup.objects.filter(patient__in=list(frankie.values_list('pk', flat=True)))
-        print(frankie)
-        # models.PatientDataSummary.objects.create(bp_readings=[130,120,150])
+        workups = Workup.objects.filter(patient__in=list(patients.values_list('pk', flat=True)))
 
-        # metrics = {
-        #     # 'age': age(qs.values('date_of_birth'))
-        #     # (now().date() - qs.values('date_of_birth')).days // 365
-        #     # 'name': models.Person.gender(self)
-        #     'bp': q.values('bp_sys')
-        # }
+        hypertensive_workups = Workup.objects.filter(bp_sys__gte=140)
 
-        # for patient in patients:
-        #     patient.
-        # for patient in models.Patient.objects.raw('SELECT * FROM core_patient'):
-        #     print(patient.gender)
+        # hypertensive_pks = list(set(hypertensive_workups.values_list('patient', flat=True))) #gets unique list of hypertensive pks
+        hypertensive_pks = list(hypertensive_workups.values_list('patient', flat=True))
+        hypertensive_bps = list(hypertensive_workups.values_list('bp_sys', flat=True)) #gets list of all hypertensive bp values from workups
+        hypertensive_ethnicities = list(models.Patient.objects.filter(pk__in=hypertensive_pks)
+                .values_list('ethnicities', flat=True))
+        hypertensive_age = list()
+        for patient in models.Patient.objects.filter(pk__in=hypertensive_pks):
+            age = patient.age()
+            hypertensive_age.append(age)
+            
+        # print(str(hypertensive_pks) + " " + str(hypertensive_age) + " " +
+        #       str(hypertensive_bps) + " " + str(hypertensive_ethnicities) + " ")
 
-        response.context_data['data'] = list(
-            patients
+        dict_list = list()
+        for pk in range(1,len(hypertensive_workups)+1):
+            dob = models.Patient.objects.filter(pk=pk)
+            for patient in dob:
+                age = patient.age()
+            dictitem = {
+                'workup': list(Workup.objects.filter(pk=pk)),
+                'bp': list(Workup.objects.filter(pk=pk).values_list('bp_sys', flat=True)),
+                'ethnicities': list(models.Patient.objects.filter(pk=pk).values_list('ethnicities', flat=True)),
+                'age': age
+            }
+            dict_list.append(dictitem)
 
-        )
-        # response.context_data['bp'] = list(
-        #     q.values('bp_sys')
-        # )
+        print(dict_list)
+
+        
+        response.context_data['data'] = dict_list
 
         return response
