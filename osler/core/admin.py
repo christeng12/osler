@@ -32,17 +32,33 @@ class PatientDataDashboardAdmin(admin.ModelAdmin):
             return response
         patients = models.Patient.objects.all()
 
+        dashboard_data = {}
+
+        for patient in patients:
+            metrics = {}
+            metrics['high_bp'] = False
+            workup = patient.latest_workup()
+            try:
+                bp_reading = workup.bp_sys
+                if(bp_reading>120):
+                    metrics['high_bp'] = bp_reading
+            except AttributeError:
+                None
+                
+            metrics['gender'] = patient.gender.name
+            metrics['age'] = (now().date() - patient.date_of_birth).days // 365
+            metrics['ethnicity'] = patient.ethnicities.name
+            dashboard_data[patient.name()] = metrics
+
         frankie = patients.filter(pk=1)
         # gets workups based on patient pk (aka get frankie's workups)
         workups = Workup.objects.filter(patient__in=list(frankie.values_list('pk', flat=True)))
-        print(frankie)
         # models.PatientDataSummary.objects.create(bp_readings=[130,120,150])
 
         # metrics = {
-        #     # 'age': age(qs.values('date_of_birth'))
-        #     # (now().date() - qs.values('date_of_birth')).days // 365
-        #     # 'name': models.Person.gender(self)
-        #     'bp': q.values('bp_sys')
+        #     #'age': (now().date() - qs.values('date_of_birth')).days // 365,
+        #     #'name': qs[0].name(),
+        #     #'bp': q.values('bp_sys'),
         # }
 
         # for patient in patients:
@@ -50,9 +66,8 @@ class PatientDataDashboardAdmin(admin.ModelAdmin):
         # for patient in models.Patient.objects.raw('SELECT * FROM core_patient'):
         #     print(patient.gender)
 
-        response.context_data['data'] = list(
-            patients
-
+        response.context_data['data'] = dict(
+            dashboard_data
         )
         # response.context_data['bp'] = list(
         #     q.values('bp_sys')

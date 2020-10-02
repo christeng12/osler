@@ -11,17 +11,40 @@
       <tr>
         <th>
           <div class=”text”>
-            <a href=”#”>Category</a>
+            <a href=”#”>Patient</a>
+          </div>
+        </th>
+        <th>
+          <div class=”text”>
+            <a href=”#”>High Blood Pressure</a>
+          </div>
+        </th>
+        <th>
+          <div class="text">
+            <a href="#">Age</a>
+          </div>
+        </th>
+        <th>
+          <div class=”text”>
+            <a href=”#”>Gender</a>
+          </div>
+        </th>
+        <th>
+          <div class=”text”>
+            <a href=”#”>
+              <strong>Ethnicity</strong>
+            </a>
           </div>
         </th>
       </tr>
     </thead>
     <tbody>
-      {% for row in data %}
+      {% for patient, metrics in data.items %}
       <tr>
-        <td> {{ row }} </td>
-        <!-- <td> {{ row.bp }} </td> -->
-        
+        <td> {{ patient }} </td>
+        {% for key, value in metrics.items %}
+          <td>{{ value }}</td>
+        {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
