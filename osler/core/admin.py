@@ -34,43 +34,38 @@ class PatientDataDashboardAdmin(admin.ModelAdmin):
 
         dashboard_data = {}
 
-        for patient in patients:
-            metrics = {}
-            metrics['high_bp'] = False
+        hypertensive_workups = Workup.objects.filter(bp_sys__gte=140)
+        hypertensive_patients = list(hypertensive_workups.values_list('patient', flat=True))
+        for pk in hypertensive_patients:
+            patient = patients.filter(pk=pk)[0]
             workup = patient.latest_workup()
-            try:
-                bp_reading = workup.bp_sys
-                if(bp_reading>120):
-                    metrics['high_bp'] = bp_reading
-            except AttributeError:
-                None
+            demographics = {}
+            demographics['bp_sys'] = workup.bp_sys
+            dashboard_data[patient.name()] = demographics
+
+
+        # for patient in patients:
+        #     metrics = {}
+        #     metrics['high_bp'] = False
+        #     workup = patient.latest_workup()
+        #     try:
+        #         bp_reading = workup.bp_sys
+        #         metrics['high_bp'] = bp_reading
+        #     except AttributeError:
+        #         None
                 
-            metrics['gender'] = patient.gender.name
-            metrics['age'] = (now().date() - patient.date_of_birth).days // 365
-            metrics['ethnicity'] = patient.ethnicities.name
-            dashboard_data[patient.name()] = metrics
+        #     metrics['gender'] = patient.gender.name
+        #     metrics['age'] = (now().date() - patient.date_of_birth).days // 365
+        #     metrics['ethnicity'] = patient.ethnicities.name
+        #     dashboard_data[patient.name()] = metrics
 
         frankie = patients.filter(pk=1)
         # gets workups based on patient pk (aka get frankie's workups)
         workups = Workup.objects.filter(patient__in=list(frankie.values_list('pk', flat=True)))
         # models.PatientDataSummary.objects.create(bp_readings=[130,120,150])
 
-        # metrics = {
-        #     #'age': (now().date() - qs.values('date_of_birth')).days // 365,
-        #     #'name': qs[0].name(),
-        #     #'bp': q.values('bp_sys'),
-        # }
-
-        # for patient in patients:
-        #     patient.
-        # for patient in models.Patient.objects.raw('SELECT * FROM core_patient'):
-        #     print(patient.gender)
-
         response.context_data['data'] = dict(
             dashboard_data
         )
-        # response.context_data['bp'] = list(
-        #     q.values('bp_sys')
-        # )
 
         return response
