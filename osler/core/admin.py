@@ -37,27 +37,26 @@ class PatientDataDashboardAdmin(admin.ModelAdmin):
         hypertensive_workups = Workup.objects.filter(bp_sys__gte=140)
         hypertensive_patients = list(hypertensive_workups.values_list('patient', flat=True))
         for pk in hypertensive_patients:
-            patient = patients.filter(pk=pk)[0]
-            workup = patient.latest_workup()
+            patient = patients.filter(pk=pk)[0] # initializes patient
+            workups = Workup.objects.filter(patient=pk)# finds all the workups for this particular patient
+            current_workup = None
             demographics = {}
-            demographics['bp_sys'] = workup.bp_sys
+
+            for w in workups: # finds the latest workup. alternative to latest_workup function
+                if(current_workup==None):
+                    current_workup = w
+                else:
+                    w_days = (now()-w.last_modified).days
+                    current_days = (now()-current_workup.last_modified).days
+                    if(w_days<current_days):
+                        current_workup = w
+                
+            demographics['bp_sys'] = current_workup.bp_sys
+            demographics['age'] = (now().date() - patient.date_of_birth).days // 365
+            demographics['gender'] = patient.gender.name
+            demographics['ethnicity'] = patient.ethnicities
             dashboard_data[patient.name()] = demographics
 
-
-        # for patient in patients:
-        #     metrics = {}
-        #     metrics['high_bp'] = False
-        #     workup = patient.latest_workup()
-        #     try:
-        #         bp_reading = workup.bp_sys
-        #         metrics['high_bp'] = bp_reading
-        #     except AttributeError:
-        #         None
-                
-        #     metrics['gender'] = patient.gender.name
-        #     metrics['age'] = (now().date() - patient.date_of_birth).days // 365
-        #     metrics['ethnicity'] = patient.ethnicities.name
-        #     dashboard_data[patient.name()] = metrics
 
         frankie = patients.filter(pk=1)
         # gets workups based on patient pk (aka get frankie's workups)
