@@ -36,9 +36,10 @@ class PatientDataDashboardAdmin(admin.ModelAdmin):
 
         hypertensive_workups = Workup.objects.filter(bp_sys__gte=140)
         hypertensive_patients = list(hypertensive_workups.values_list('patient', flat=True))
+        num_patients = 0 
         for pk in hypertensive_patients:
             patient = patients.filter(pk=pk)[0] # initializes patient
-            workups = Workup.objects.filter(patient=pk)# finds all the workups for this particular patient
+            workups = Workup.objects.filter(patient=pk) # finds all the workups for this particular patient
             current_workup = None
             demographics = {}
 
@@ -56,6 +57,9 @@ class PatientDataDashboardAdmin(admin.ModelAdmin):
             demographics['gender'] = patient.gender.name
             demographics['ethnicity'] = patient.ethnicities
             dashboard_data[patient.name()] = demographics
+            num_patients+=1
+            if(num_patients>25):
+                break
 
 
         frankie = patients.filter(pk=1)
